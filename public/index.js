@@ -1,5 +1,39 @@
+(function () {
+  "use strict";
+  kintone.events.on('app.record.index.show', function(event){ 
+    console.log('index is showed');
+    $('.box-gaia').prepend('<div id="kintone_portal"></div>');
+    var $html = $('#kintone_portal');
+    $html.html("<h1>今期売上10億円!</h1>");
+
+    var url = kintone.api.url('/k/v1/apps', true);
+    $html.append('<div id="kintone_portal_apps"></div>');
+    kintone.api(url, 'GET', {}, function(resp) {
+      $("#kintone_portal_apps").html(renderTable(resp.apps));
+    });
+
+    var records = event.records;
+    for(var i = 0; i < records.length; i++) {
+      var record = records[i]
+      var appId  = record['appId']['value']
+      var reportId  = record['reportId']['value']
+      var query  = record['query']['value']
+      if(reportId){
+        $html.append('<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>');
+      } else {
+        var url = kintone.api.url('/k/v1/records', true);
+        $html.append('<div id="kintone_portal_table_'+i+'">hogehoge</div>');
+        var i2 = i;
+        kintone.api(url, 'GET', {app: appId, query: query}, function(resp) {
+          $("#kintone_portal_table_"+i2).html(renderTable(resp.records));
+        });
+      }
+    }
+  });
+})();
+
 function renderTable(records) {
-  html = '<table class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">'
+  var html = '<table class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">'
   for(var i = 0; i < records.length; i++) {
     var record = records[i];
     if(record['title']){
@@ -25,30 +59,4 @@ function renderTable(records) {
   return html
 }
 
-(function () {
-  "use strict";
-  kintone.events.on('app.record.index.show', function(event){ 
-    console.log('index is showed');
-    var html = "<h1>今期売上10億円!</h1>"
 
-    kintone.api(kintone.api.url('/k/v1/apps', true), 'GET', {}, function(resp) {
-      html += renderTable(resp.apps);
-    });
-
-    var appId = 138;
-    var query = kintone.app.getQueryCondition() + 'repository_full_name = "pandeiro245/kintone_sync" and state != "closed"';
-    kintone.api(kintone.api.url('/k/v1/records', true), 'GET', {app: appId, query: query}, function(resp) {
-      html += renderTable(resp.records);
-
-      var records = event.records;
-      for(var i = 0; i < records.length; i++) {
-        var record = records[i]
-        var appId  = record['appId']['value']
-        var reportId  = record['reportId']['value']
-        html += '<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>';
-      }
-
-      $('.box-gaia').prepend(html);
-    });
-  });
-})();
