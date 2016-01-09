@@ -15,22 +15,26 @@
     var records = event.records;
     for(var i = 0; i < records.length; i++) {
       var record = records[i]
+      var id  = record['$id']['value']
       var appId  = record['appId']['value']
       var reportId  = record['reportId']['value']
       var query  = record['query']['value']
       if(reportId){
         $html.append('<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>');
       } else {
-        var url = kintone.api.url('/k/v1/records', true);
-        $html.append('<div id="kintone_portal_table_'+i+'">hogehoge</div>');
-        var i2 = i;
-        kintone.api(url, 'GET', {app: appId, query: query}, function(resp) {
-          $("#kintone_portal_table_"+i2).html(renderTable(resp.records));
-        });
+        $html.append('<div id="kintone_portal_table_'+id+'">※取得中...</div>');
+        initTable(id, {app: appId, query: query});
       }
     }
   });
 })();
+
+function initTable(id, params) {
+  var url = kintone.api.url('/k/v1/records', true);
+  kintone.api(url, 'GET', params, function(resp) {
+    $("#kintone_portal_table_"+id).html(renderTable(resp.records));
+  });
+}
 
 function renderTable(records) {
   var html = '<table class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">'
@@ -42,6 +46,10 @@ function renderTable(records) {
       var title_with_link = '<a href="'+url+'" target="_blank">'+title+'</a>'
       var body = record['body']['value'];
       html += '<tr class="recordlist-row-gaia"><td class="recordlist-cell-gaia recordlist-single_line_text-gaia" style="width: 300px;">'+title_with_link+'</td><td>'+body+'</td></tr>';
+    } else if(record['Company']){
+      var company = record['Company']['value'];
+      var s = record['status']['value'];
+      html += '<tr class="recordlist-row-gaia"><td class="recordlist-cell-gaia recordlist-single_line_text-gaia" style="width: 300px;">'+company+'</td><td>'+s+'</td></tr>';
     } else {
       var name = record['name'];
       var appId = record['appId'];
