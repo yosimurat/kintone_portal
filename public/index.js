@@ -2,19 +2,31 @@
   "use strict";
   kintone.events.on('app.record.index.show', function(event){ 
     console.log('index is showed');
-    //$('.title-gaia').hide();
-    //$('.gaia-ui-actionmenu').hide();
-    //$('.menu-gaia').hide();
-    //$('.gaia-ui-listtable-bottommenu').hide();
-    
-    var records = event.records;
-    console.log(event);
-    for(var i = 0; i < records.length; i++) {
-      var record = records[i]
-      var appId  = record['appId']['value']
-      var reportId  = record['reportId']['value']
-      $('.box-gaia').prepend('<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>');
-    }
-    $('.box-gaia').prepend("<h1>今期売上10億円!</h1>");
+    var html = "<h1>今期売上10億円!</h1>"
+    var appId = 138;
+    var query = kintone.app.getQueryCondition() + 'repository_full_name = "pandeiro245/kintone_sync" and state != "closed"';
+    kintone.api(kintone.api.url('/k/v1/records', true), 'GET', {app: appId, query: query}, function(resp) {
+      var records = resp.records
+      html += '<table class="recordlist-gaia" style="table-layout: fixed; position: relative;">'
+        for(var i = 0; i < records.length; i++) {
+          var record = records[i];
+          console.log(record);
+          var title = record['title']['value'];
+          var url = record['html_url']['value'];
+          var title_with_link = '<a href="'+url+'" target="_blank">'+title+'</a>'
+          var body = record['body']['value'];
+          html += '<tr class="recordlist-row-gaia"><td class="recordlist-cell-gaia recordlist-single_line_text-gaia" style="width: 300px;">'+title_with_link+'</td><td>'+body+'</td></tr>';
+        }
+      html += '</table>'
+      var records = event.records;
+      for(var i = 0; i < records.length; i++) {
+        var record = records[i]
+        console.log(record);
+        var appId  = record['appId']['value']
+        var reportId  = record['reportId']['value']
+        html += '<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>';
+      }
+      $('.box-gaia').prepend(html);
+    });
   });
 })();
