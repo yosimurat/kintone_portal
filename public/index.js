@@ -1,24 +1,27 @@
 (function () {
   "use strict";
-
   kintone.events.on(['mobile.app.record.index.show', 'app.record.index.show'], function(event){ 
     console.log('index is showed');
-    $('.box-gaia').prepend('<div class="kintone_portal"></div>');
-    $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
-    var $html = $('.kintone_portal');
-    $html.html("<h1>今期売上10億円!</h1>"); //TODO: kintoneレコード化
-
-    var records = event.records;
-    if(records){
-      init(records);
-    } else {
-      var url = kintone.api.url('/k/v1/records', true);
-      kintone.api(url, 'GET', {app: 139}, function(resp) {
-        init(resp.records);
-      });
-    }
+    initIndex(event);
   });
 })();
+
+function initIndex(event) {
+  $('.box-gaia').prepend('<div class="kintone_portal"></div>');
+  $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
+  var $html = $('.kintone_portal');
+  $html.html("<h1>今期売上10億円!</h1>"); //TODO: kintoneレコード化
+
+  var records = event.records;
+  if(records){
+    init(records);
+  } else {
+    var url = kintone.api.url('/k/v1/records', true);
+    kintone.api(url, 'GET', {app: 139}, function(resp) {
+      init(resp.records);
+    });
+  }
+}
 
 function init(records) {
   var $html = $('.kintone_portal');
@@ -51,22 +54,40 @@ function initTable(id, fields, params, title) {
     var records = resp.records;
     var url = kintone.api.url('/k/v1/app/form/fields', true);
     var options = null;
+    var appId = params.app;
     kintone.api(url, 'GET', {app: params.app}, function(resp){
-      console.log(resp.properties);
       if(resp.properties['status']) {
         options = {status: resp.properties['status'].options};
       }
       $("#kintone_portal_table_"+id).html(
-        renderTable(title, fields, records, options)
+        renderTable(title, fields, records, options, appId, id)
       );
+      $('#kintone_portal_'+id+' select.status').change(function(e){
+        console.log(e);
+        $e = $(e.target);
+        var val = $e.val();
+        var appId = parseInt($e.attr('data-app-id'));
+        var id = parseInt($e.attr('data-id'));
+        var url = kintone.api.url('/k/v1/record', true);
+        var params = {
+          app: appId,
+          id: id,
+          record: {
+            status: {value: val}
+          }
+        }
+        kintone.api(url, 'PUT', params, function(resp){
+          console.log('updated!.');
+        });
+      });
     });
   });
 }
 
-function renderTable(title, fields, records, options) {
+function renderTable(title, fields, records, options, appId, id) {
   var html = ''
   html += '<div style="width:800px; float:left; margin:17px;">'
-  html +='<h2>'+title+'</h2><table class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">';
+  html +='<h2>'+title+'</h2><table id="kintone_portal_'+id+'" cilass=""class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">';
   for(var i = 0; i < records.length; i++) {
     var record = records[i];
     if(record['appId']){
@@ -82,6 +103,7 @@ function renderTable(title, fields, records, options) {
       }
     } else {
       html += '<tr class="recordlist-row-gaia">';
+      var id = record['$id']['value'];
       for(var i2 = 0; i2 < fields.length; i2++) {
         var key = fields[i2];
         var val = ''
@@ -92,7 +114,7 @@ function renderTable(title, fields, records, options) {
           val = '<a href="'+url+'" target="_blank">'+val+'</a>';
         } else {
           if(key == 'status') {
-            val += '<select>';
+            val += '<select class="status" data-app-id="'+appId+'" data-id="'+id+'">';
             for(k in options.status){
               if(k == record[key]['value']){
                 val += '<option selected="selected">'+k+'</option>';
@@ -107,7 +129,7 @@ function renderTable(title, fields, records, options) {
         }
         html += '<td class="recordlist-cell-gaia recordlist-single_line_text-gaia">'+val+'</td>';
       }
-      //html += '</tr>';
+      html += '</tr>';
     }
   }
   html += '</table>'
