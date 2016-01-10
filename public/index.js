@@ -3,11 +3,10 @@
 
   kintone.events.on(['mobile.app.record.index.show', 'app.record.index.show'], function(event){ 
     console.log('index is showed');
-    //$('.box-gaia').prepend('<div id="nc"></div>');
     $('.box-gaia').prepend('<div class="kintone_portal"></div>');
     $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
     var $html = $('.kintone_portal');
-    $html.html("<h1>今期売上10億円!</h1>");
+    $html.html("<h1>今期売上10億円!</h1>"); //TODO: kintoneレコード化
 
     var records = event.records;
     if(records){
@@ -15,7 +14,6 @@
     } else {
       var url = kintone.api.url('/k/v1/records', true);
       kintone.api(url, 'GET', {app: 139}, function(resp) {
-        console.log(resp);
         init(resp.records);
       });
     }
@@ -50,11 +48,22 @@ function init(records) {
 function initTable(id, fields, params, title) {
   var url = kintone.api.url('/k/v1/records', true);
   kintone.api(url, 'GET', params, function(resp) {
-    $("#kintone_portal_table_"+id).html(renderTable(title, fields, resp.records));
+    var records = resp.records;
+    var url = kintone.api.url('/k/v1/app/form/fields', true);
+    var options = null;
+    kintone.api(url, 'GET', {app: params.app}, function(resp){
+      console.log(resp.properties);
+      if(resp.properties['status']) {
+        options = {status: resp.properties['status'].options};
+      }
+      $("#kintone_portal_table_"+id).html(
+        renderTable(title, fields, records, options)
+      );
+    });
   });
 }
 
-function renderTable(title, fields, records) {
+function renderTable(title, fields, records, options) {
   var html = ''
   html += '<div style="width:800px; float:left; margin:17px;">'
   html +='<h2>'+title+'</h2><table class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">';
@@ -82,7 +91,19 @@ function renderTable(title, fields, records) {
           val = record[key2[0]]['value'];
           val = '<a href="'+url+'" target="_blank">'+val+'</a>';
         } else {
-          val = record[key]['value'];
+          if(key == 'status') {
+            val += '<select>';
+            for(k in options.status){
+              if(k == record[key]['value']){
+                val += '<option selected="selected">'+k+'</option>';
+              }else{
+                val += '<option>'+k+'</option>';
+              }
+            }
+            val += '</select>';
+          } else {
+            val = record[key]['value']
+          }
         }
         html += '<td class="recordlist-cell-gaia recordlist-single_line_text-gaia">'+val+'</td>';
       }
