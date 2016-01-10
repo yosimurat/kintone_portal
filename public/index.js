@@ -1,7 +1,7 @@
 (function () {
   "use strict";
-  kintone.events.on(['mobile.app.record.index.show', 'app.record.index.show'], function(event){ 
-    console.log('index is showed');
+  var scenes = ['mobile.app.record.index.show', 'app.record.index.show']
+  kintone.events.on(scenes, function(event){ 
     initIndex(event);
   });
 })();
@@ -10,14 +10,13 @@ function initIndex(event) {
   $('.box-gaia').prepend('<div class="kintone_portal"></div>');
   $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
   var $html = $('.kintone_portal');
-  $html.html("<h1>今期売上10億円!</h1>"); //TODO: kintoneレコード化
-
   var records = event.records;
   if(records){
     init(records);
   } else {
     var url = kintone.api.url('/k/v1/records', true);
-    kintone.api(url, 'GET', {app: 139}, function(resp) {
+    var appId = kintone.app.getId();
+    kintone.api(url, 'GET', {app: appId}, function(resp) {
       init(resp.records);
     });
   }
@@ -33,8 +32,11 @@ function init(records) {
     var query  = record['query']['value']
     var title = record['title']['value']
     var fields = record['fields']['value'].split(',');
+    var space  = record['space']['value']
     if(reportId){
       $html.append('<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>');
+    } else if(space){
+      $html.append('<h1>'+space+'</h1>');
     } else {
       $html.append('<div id="kintone_portal_table_'+id+'">※取得中...</div>');
       initTable(id, fields, {app: appId, query: query}, title);
@@ -106,7 +108,8 @@ function renderTable(title, fields, records, options, appId, id) {
       var id = record['$id']['value'];
       for(var i2 = 0; i2 < fields.length; i2++) {
         var key = fields[i2];
-        var val = ''
+        var val = '';
+
         if(key.match(/_with_/)){
           var key2 = key.split('_with_');
           var url = record[key2[1]]['value'];
@@ -123,11 +126,14 @@ function renderTable(title, fields, records, options, appId, id) {
               }
             }
             val += '</select>';
+          //} else if('MULTI_LINE_TEXT' == record[key]['type']) {
+          //  val = '<textarea styke="width:100%;">'+record[key]['value']+'</textarea>';
           } else {
-            val = record[key]['value']
+          //  val = '<input value="'+record[key]['value']+'" style="width: 300px;"/>';
+            val = parseHttp(record[key]['value']);
           }
         }
-        html += '<td class="recordlist-cell-gaia recordlist-single_line_text-gaia">'+val+'</td>';
+        html += '<td class="recordlist-cell-gaia recordlist-single_line_text-gaia" style="width:180px;">'+val+'</td>';
       }
       html += '</tr>';
     }
@@ -136,4 +142,16 @@ function renderTable(title, fields, records, options, appId, id) {
   html += '</div>'
   return html
 }
+
+parseHttp = function(str) {
+  return str.replace(/https?:\/\/[\w?=&.\/-;#~%\-+!]+(?![\w\s?&.\/;#~%"=\-\!]*>)/g, function(http) {
+    var text = http;
+    if (text.length > 30) {
+      text = text.substring(0, 21) + "...";
+    }
+    return "<a href=\"" + http + "\" target=\"_blank\">" + text + "</a>";
+  });
+};
+
+
 
