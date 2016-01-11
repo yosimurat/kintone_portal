@@ -1,5 +1,7 @@
 (function () {
   "use strict";
+  window.thisAppId = kintone.app.getId();
+
   var scenes = ['mobile.app.record.index.show', 'app.record.index.show']
   kintone.events.on(scenes, function(event){ 
     initIndex(event);
@@ -11,12 +13,11 @@ function initIndex(event) {
   $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
   var $html = $('.kintone_portal');
   var records = event.records;
-  if(records){
+  if(records){ // PC
     init(records);
-  } else {
+  } else { // mobile
     var url = kintone.api.url('/k/v1/records', true);
-    var appId = kintone.app.getId();
-    kintone.api(url, 'GET', {app: appId}, function(resp) {
+    kintone.api(url, 'GET', {app: window.thisAppId}, function(resp) {
       init(resp.records);
     });
   }
@@ -26,24 +27,25 @@ function init(records) {
   var $html = $('.kintone_portal');
   for(var i = 0; i < records.length; i++) {
     var record = records[i]
-    var id  = record['$id']['value']
-    var appId  = record['appId']['value']
-    var reportId  = record['reportId']['value']
-    var query  = record['query']['value']
-    var title = record['title']['value']
+    var id  = record['$id']['value'];
+    var appId  = record['appId']['value'];
+    var reportId  = record['reportId']['value'];
+    var query  = record['query']['value'];
+    var title = record['title']['value'];
     var fields = record['fields']['value'].split(',');
-    var space  = record['space']['value']
+    var space  = record['space']['value'];
     if(reportId){
-      $html.append('<iframe width="800" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe>');
-    } else if(space){
-      $html.append('<h1>'+space+'</h1>');
+      $html.append('<div style="float:left; width:800px;"><iframe width="100%" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe></div>');
+    } else if(space && space.replace(/<div>/, '').replace(/<\/div>/, '').replace(/<br \/>/, '').length){
+      var editLink = '<a href="https://ruffnote.cybozu.com/k/'+window.thisAppId+'/show#record='+id+'&mode=edit">編集</a>';
+      $html.append('<div style="float:left; width:800px;">'+space+editLink+'</div>');
     } else {
-      $html.append('<div id="kintone_portal_table_'+id+'">※取得中...</div>');
+      $html.append('<div id="kintone_portal_table_'+id+'" style="float:left; width:800px;">※取得中...</div>');
       initTable(id, fields, {app: appId, query: query}, title);
     }
   }
   var url = kintone.api.url('/k/v1/apps', true);
-  $html.append('<div id="kintone_portal_apps"></div>');
+  $html.append('<div id="kintone_portal_apps" style="clear:both;"></div>');
   var fields = record['fields']['value'].split(',');
   kintone.api(url, 'GET', {}, function(resp) {
     $("#kintone_portal_apps").html(renderTable('アプリ一覧', fields, resp.apps));
@@ -65,7 +67,6 @@ function initTable(id, fields, params, title) {
         renderTable(title, fields, records, options, appId, id)
       );
       $('#kintone_portal_'+id+' select.status').change(function(e){
-        console.log(e);
         $e = $(e.target);
         var val = $e.val();
         var appId = parseInt($e.attr('data-app-id'));
@@ -88,7 +89,6 @@ function initTable(id, fields, params, title) {
 
 function renderTable(title, fields, records, options, appId, id) {
   var html = ''
-  html += '<div style="width:800px; float:left; margin:17px;">'
   html +='<h2>'+title+'</h2><table id="kintone_portal_'+id+'" cilass=""class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">';
   for(var i = 0; i < records.length; i++) {
     var record = records[i];
@@ -139,7 +139,6 @@ function renderTable(title, fields, records, options, appId, id) {
     }
   }
   html += '</table>'
-  html += '</div>'
   return html
 }
 
@@ -152,6 +151,4 @@ parseHttp = function(str) {
     return "<a href=\"" + http + "\" target=\"_blank\">" + text + "</a>";
   });
 };
-
-
 
