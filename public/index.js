@@ -34,13 +34,14 @@ function init(records) {
     var title = record['title']['value'];
     var fields = record['fields']['value'].split(',');
     var space  = record['space']['value'];
+    var width  = 600;
     if(reportId){
-      $html.append('<div style="float:left; width:800px;"><iframe width="100%" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe></div>');
+      $html.append('<div style="float:left; width:'+width+'px;"><iframe width="100%" height="600" frameborder="0" src="/k/'+appId+'/report/portlet?report='+reportId+'"></iframe></div>');
     } else if(space && space.replace(/<div>/, '').replace(/<\/div>/, '').replace(/<br \/>/, '').length){
       var editLink = '<a href="https://ruffnote.cybozu.com/k/'+window.thisAppId+'/show#record='+id+'&mode=edit">編集</a>';
-      $html.append('<div style="float:left; width:800px;">'+space+editLink+'</div>');
+      $html.append('<div style="float:left; width:'+width+'px;">'+space+editLink+'</div>');
     } else {
-      $html.append('<div id="kintone_portal_table_'+id+'" style="float:left; width:800px;">※取得中...</div>');
+      $html.append('<div id="kintone_portal_table_'+id+'" style="float:left; width:'+width+'px;">※取得中...</div>');
       initTable(id, fields, {app: appId, query: query}, title);
     }
   }
@@ -89,7 +90,7 @@ function initTable(id, fields, params, title) {
 
 function renderTable(title, fields, records, options, appId, id) {
   var html = ''
-  html +='<h2>'+title+'</h2><table id="kintone_portal_'+id+'" cilass=""class="recordlist-gaia" style="table-layout: fixed; position: relative; margin-bottom:30px;">';
+  html +='<h2>'+title+'</h2><table id="kintone_portal_'+id+'" cilass=""class="recordlist-gaia" style="margin:0 20px 30px 20px;">';
   for(var i = 0; i < records.length; i++) {
     var record = records[i];
     if(record['appId']){
@@ -104,8 +105,9 @@ function renderTable(title, fields, records, options, appId, id) {
         html += '</tr>';
       }
     } else {
-      html += '<tr class="recordlist-row-gaia">';
       var id = record['$id']['value'];
+      html += '<tr class="recordlist-row-gaia">';
+      html += '<td><a href="https://ruffnote.cybozu.com/k/'+appId+'/show#record='+id+'&mode=edit" target="_blank">'+id+'</a></td>';
       for(var i2 = 0; i2 < fields.length; i2++) {
         var key = fields[i2];
         var val = '';
