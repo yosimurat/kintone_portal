@@ -10845,26 +10845,11 @@ return jQuery;
 
   env.chattime = localStorage['dev_chat'] ? parseFloat(localStorage['dev_chat']) : 5;
 
-  if (location.href.match(/245cloud.com/) || location.href.match(/production_mode=/)) {
-    env.parse_app_id = 'jemiGIUHsvNeVQojqiUaXxFJZvzFDxFbUsfjPr78';
-    env.parse_key = 'ZoyMZflFV5H2VoASJv505vJ2wWd9zqa2ZW5MU780';
-    env.facebook_app_id = '275431199325537';
-    env.milkcocoa = 'iceiabmz2nv';
-    env.yt_client_id = 'AIzaSyAvb5RW4gNEcQlaHODHZ1h0jjYxD8mKvIM';
-  } else {
-    env.parse_app_id = '8QzCMkUbx7TyEApZjDRlhpLQ2OUj0sQWTnkEExod';
-    env.parse_key = 'gzlnFfIOoLFQzQ08bU4mxkhAHcSqEok3rox0PBOM';
-    env.milkcocoa = 'hotiabmydrw';
-    env.yt_client_id = 'AIzaSyD1A25NZMbp4VA4uikV8e-naG7oVa-B1pY';
-    if (location.href.match(/localhost:3001/)) {
-      env.facebook_app_id = '322004764668180';
-    } else if (location.href.match(/245cloud.dev/)) {
-      env.facebook_app_id = '363848477150475';
-    } else if (location.href.match(/nishikocloud-staging.herokuapp.com/)) {
-      env.facebook_app_id = '366798926855430';
-    }
-  }
-
+  env.parse_app_id = 'jemiGIUHsvNeVQojqiUaXxFJZvzFDxFbUsfjPr78';
+  env.parse_key = 'ZoyMZflFV5H2VoASJv505vJ2wWd9zqa2ZW5MU780';
+  env.facebook_app_id = '275431199325537';
+  env.milkcocoa = 'iceiabmz2nv';
+  env.yt_client_id = 'AIzaSyAvb5RW4gNEcQlaHODHZ1h0jjYxD8mKvIM';
   env.is_kakuhen = false;
 
   this.env = env;
@@ -12008,6 +11993,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
   this.nomusic_url = 'https://ruffnote.com/attachments/24985';
 
   $(function() {
+    kintone.events.on('app.record.index.show', function(event){ 
     var j, len, ref, service, user;
     if (!$('#nc').length) {
       return;
@@ -12085,6 +12071,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
         return window.current_user = user;
       });
     }
+  });
   });
 
   initHeatmap = function() {
