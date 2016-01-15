@@ -1,4 +1,3 @@
-alert 3
 initIndex = (event) ->
   $('.box-gaia').prepend '<div class="kintone_portal"></div>'
   $('.listview-gaia').prepend '<div class="kintone_portal"></div>'
