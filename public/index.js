@@ -9,7 +9,7 @@
 })();
 
 function initIndex(event) {
-  $('.box-gaia').prepend('<div class="kintone_portal"></div>');
+  $('.box-gaia').prepend('<div id="nc"></div><div class="kintone_portal"></div>');
   $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
   var $html = $('.kintone_portal');
   var records = event.records;

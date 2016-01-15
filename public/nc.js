@@ -10907,7 +10907,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
 
     EightTracks.search = function(keyword, client_id, $dom, callback) {
       var url;
-      url = "http://api.soundcloud.com/tracks.json?client_id=" + window.env.sc_client_id + "&q=" + keyword + "&duration[from]=" + (24 * 60 * 1000);
+      url = "//api.soundcloud.com/tracks.json?client_id=" + window.env.sc_client_id + "&q=" + keyword + "&duration[from]=" + (24 * 60 * 1000);
       return $.get(url, function(tracks) {
         var artwork, href, i, len, track;
         if (tracks[0]) {
@@ -11009,7 +11009,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
 
     Mixcloud.fetch = function(mc_id, callback) {
       var url;
-      url = "http://api.mixcloud.com" + mc_id;
+      url = "//api.mixcloud.com" + mc_id;
       console.log(url);
       return $.getJSON(url, function(track) {
         console.log(track);
@@ -11033,7 +11033,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
       if (callback == null) {
         callback = null;
       }
-      url = "http://api.mixcloud.com/search/?q=" + keyword + "&type=cloudcast";
+      url = "//api.mixcloud.com/search/?q=" + keyword + "&type=cloudcast";
       return $.getJSON(url, function(tracks) {
         var artwork, href, i, len, ref, track;
         if (tracks.data) {
@@ -11128,7 +11128,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
       if (callback == null) {
         callback = null;
       }
-      url = "http://api.search.nicovideo.jp/api/snapshot/";
+      url = "//api.search.nicovideo.jp/api/snapshot/";
       query = {
         query: keyword,
         service: ["video"],
@@ -11420,7 +11420,7 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
       if (callback == null) {
         callback = null;
       }
-      url = "http://api.soundcloud.com/tracks.json?client_id=" + window.env.sc_client_id + "&q=" + keyword + "&duration[from]=" + (24 * 60 * 1000);
+      url = "//api.soundcloud.com/tracks.json?client_id=" + window.env.sc_client_id + "&q=" + keyword + "&duration[from]=" + (24 * 60 * 1000);
       return $.get(url, function(tracks) {
         var artwork, href, i, len, track;
         if (tracks[0]) {
