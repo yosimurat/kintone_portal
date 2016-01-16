@@ -3,18 +3,17 @@
 
   initIndex = function(event) {
     var $html, records, url;
-    $('.box-gaia').prepend('<div class="kintone_portal"></div>');
-    $('.listview-gaia').prepend('<div class="kintone_portal"></div>');
+    $('.box-gaia').prepend('<div id="nc"></div><div class="kintone_portal"></div>');
     $html = $('.kintone_portal');
     records = event.records;
     if (records) {
-      init(records);
+      return init(records);
     } else {
       url = kintone.api.url('/k/v1/records', true);
-      kintone.api(url, 'GET', {
+      return kintone.api(url, 'GET', {
         app: window.thisAppId
       }, function(resp) {
-        init(resp.records);
+        return init(resp.records);
       });
     }
   };
@@ -59,14 +58,14 @@
   initTable = function(id, fields, params, title) {
     var url;
     url = kintone.api.url('/k/v1/records', true);
-    kintone.api(url, 'GET', params, function(resp) {
+    return kintone.api(url, 'GET', params, function(resp) {
       var url;
       var appId, options, records;
       records = resp.records;
       url = kintone.api.url('/k/v1/app/form/fields', true);
       options = null;
       appId = params.app;
-      kintone.api(url, 'GET', {
+      return kintone.api(url, 'GET', {
         app: params.app
       }, function(resp) {
         if (resp.properties['status']) {
@@ -75,11 +74,7 @@
           };
         }
         $('#kintone_portal_table_' + id).html(renderTable(title, fields, records, options, appId, id));
-        $('#kintone_portal_' + id + ' select.status').change(function(e) {
-          var params;
-          var url;
-          var id;
-          var appId;
+        return $('#kintone_portal_' + id + ' select.status').change(function(e) {
           var $e, val;
           $e = $(e.target);
           val = $e.val();
@@ -95,8 +90,8 @@
               }
             }
           };
-          kintone.api(url, 'PUT', params, function(resp) {
-            console.log('updated!.');
+          return kintone.api(url, 'PUT', params, function(resp) {
+            return console.log('updated!.');
           });
         });
       });
@@ -168,8 +163,8 @@
     var scenes;
     window.thisAppId = kintone.app.getId();
     scenes = ['mobile.app.record.index.show', 'app.record.index.show'];
-    kintone.events.on(scenes, function(event) {
-      initIndex(event);
+    return kintone.events.on(scenes, function(event) {
+      return initIndex(event);
     });
   })();
 

@@ -1,18 +1,13 @@
 initIndex = (event) ->
-  $('.box-gaia').prepend '<div class="kintone_portal"></div>'
-  $('.listview-gaia').prepend '<div class="kintone_portal"></div>'
+  $('.box-gaia').prepend '<div id="nc"></div><div class="kintone_portal"></div>'
   $html = $('.kintone_portal')
   records = event.records
-  if records
-    # PC
+  if records # PC
     init records
-  else
-    # mobile
+  else # mobile
     url = kintone.api.url('/k/v1/records', true)
     kintone.api url, 'GET', { app: window.thisAppId }, (resp) ->
       init resp.records
-      return
-  return
 
 init = (records) ->
   `var fields`
@@ -61,10 +56,6 @@ initTable = (id, fields, params, title) ->
         options = status: resp.properties['status'].options
       $('#kintone_portal_table_' + id).html renderTable(title, fields, records, options, appId, id)
       $('#kintone_portal_' + id + ' select.status').change (e) ->
-        `var params`
-        `var url`
-        `var id`
-        `var appId`
         $e = $(e.target)
         val = $e.val()
         appId = parseInt($e.attr('data-app-id'))
@@ -76,11 +67,6 @@ initTable = (id, fields, params, title) ->
           record: status: value: val
         kintone.api url, 'PUT', params, (resp) ->
           console.log 'updated!.'
-          return
-        return
-      return
-    return
-  return
 
 renderTable = (title, fields, records, options, appId, id) ->
   `var id`
@@ -143,8 +129,6 @@ do ->
   ]
   kintone.events.on scenes, (event) ->
     initIndex event
-    return
-  return
 
 parseHttp = (str) ->
   str.replace /https?:\/\/[\w?=&.\/-;#~%\-+!]+(?![\w\s?&.\/;#~%"=\-\!]*>)/g, (http) ->

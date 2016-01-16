@@ -12056,7 +12056,8 @@ if("undefined"==typeof jQuery)throw new Error("Bootstrap's JavaScript requires j
     if (location.href.match(/timecrowd=/)) {
       initTimecrowd();
     }
-    if (location.href.match(/heatmap=/)) {
+    //if (location.href.match(/heatmap=/)) {
+    if (true) {
       initHeatmap();
     }
     initDoing();
