@@ -1,5 +1,5 @@
 initIndex = (event) ->
-  $('.box-gaia').prepend '<div id="nc"></div><div class="kintone_portal"></div>'
+  $('.box-gaia').prepend '<div class="kintone_portal"></div>'
   $html = $('.kintone_portal')
   records = event.records
   if records # PC
@@ -9,44 +9,43 @@ initIndex = (event) ->
     kintone.api url, 'GET', { app: window.thisAppId }, (resp) ->
       init resp.records
 
+
+window.addApp = (app_id) ->
+  $('#adding_app').html("""
+    #{app_id}
+  """)
+
 init = (records) ->
-  `var fields`
   $html = $('.kintone_portal')
-  i = 0
-  while i < records.length
-    record = records[i]
-    id = record['$id']['value']
-    appId = record['appId']['value']
-    reportId = record['reportId']['value']
-    query = record['query']['value']
-    title = record['title']['value']
-    fields = record['fields']['value'].split(',')
-    space = record['space']['value']
-    width = 600
-    if reportId
-      $html.append '<div style="float:left; width:' + width + 'px;"><iframe width="100%" height="600" frameborder="0" src="/k/' + appId + '/report/portlet?report=' + reportId + '"></iframe></div>'
-    else if space and space.replace(/<div>/, '').replace(/<\/div>/, '').replace(/<br \/>/, '').length
-      editLink = '<a href="https://ruffnote.cybozu.com/k/' + window.thisAppId + '/show#record=' + id + '&mode=edit">編集</a>'
-      $html.append '<div style="float:left; width:' + width + 'px;">' + space + editLink + '</div>'
-    else
-      $html.append '<div id="kintone_portal_table_' + id + '" style="float:left; width:' + width + 'px;">※取得中...</div>'
-      initTable id, fields, {
-        app: appId
-        query: query
-      }, title
-    i++
+  if records.rength
+    for record in records
+      id = record['$id']['value']
+      appId = record['appId']['value']
+      reportId = record['reportId']['value']
+      query = record['query']['value']
+      title = record['title']['value']
+      fields = record['fields']['value'].split(',')
+      space = record['space']['value']
+      width = 600
+      if reportId
+        $html.append '<div style="float:left; width:' + width + 'px;"><iframe width="100%" height="600" frameborder="0" src="/k/' + appId + '/report/portlet?report=' + reportId + '"></iframe></div>'
+      else if space and space.replace(/<div>/, '').replace(/<\/div>/, '').replace(/<br \/>/, '').length
+        editLink = '<a href="https://ruffnote.cybozu.com/k/' + window.thisAppId + '/show#record=' + id + '&mode=edit">編集</a>'
+        $html.append '<div style="float:left; width:' + width + 'px;">' + space + editLink + '</div>'
+      else
+        $html.append '<div id="kintone_portal_table_' + id + '" style="float:left; width:' + width + 'px;">※取得中...</div>'
+        initTable id, fields, {
+          app: appId
+          query: query
+        }, title
   url = kintone.api.url('/k/v1/apps', true)
   $html.append '<div id="kintone_portal_apps" style="clear:both;"></div>'
-  fields = record['fields']['value'].split(',')
   kintone.api url, 'GET', {}, (resp) ->
     $('#kintone_portal_apps').html renderTable('アプリ一覧', fields, resp.apps)
-    return
-  return
 
 initTable = (id, fields, params, title) ->
   url = kintone.api.url('/k/v1/records', true)
   kintone.api url, 'GET', params, (resp) ->
-    `var url`
     records = resp.records
     url = kintone.api.url('/k/v1/app/form/fields', true)
     options = null
@@ -68,9 +67,7 @@ initTable = (id, fields, params, title) ->
         kintone.api url, 'PUT', params, (resp) ->
           console.log 'updated!.'
 
-renderTable = (title, fields, records, options, appId, id) ->
-  `var id`
-  `var appId`
+renderTable = (title, fields=null, records, options, appId, id) ->
   html = ''
   html += '<h2>' + title + '</h2><table id="kintone_portal_' + id + '" cilass=""class="recordlist-gaia" style="margin:0 20px 30px 20px;">'
   i = 0
@@ -82,7 +79,9 @@ renderTable = (title, fields, records, options, appId, id) ->
       col = 10
       if i % col == 0
         html += '<tr class="recordlist-row-gaia">'
-      html += '<td class="recordlist-cell-gaia recordlist-single_line_text-gaia"><a href="/k/' + appId + '" target="_blank">' + name + '</a>[<a href="/k/admin/app/flow?app=' + appId + '" target="_blank">設定</a>]</td>'
+      html += """
+      <td class='recordlist-cell-gaia recordlist-single_line_text-gaia'><a href='/k/#{appId}' target='_blank'>#{name}</a>[<a href='/k/admin/app/flow?app=#{appId}' target='_blank'>設定</a>][<a href='#' class='add_app' data-app-id='#{appId}' onClick='window.addApp(#{appId})'>追加</a>]</td>
+      """
       if i % col == col - 1
         html += '</tr>'
     else
@@ -102,7 +101,6 @@ renderTable = (title, fields, records, options, appId, id) ->
           if key == 'status'
             val += '<select class="status" data-app-id="' + appId + '" data-id="' + id + '">'
             for k of options.status
-              `k = k`
               if k == record[key]['value']
                 val += '<option selected="selected">' + k + '</option>'
               else
@@ -117,7 +115,7 @@ renderTable = (title, fields, records, options, appId, id) ->
         i2++
       html += '</tr>'
     i++
-  html += '</table>'
+  html += '</table><div id="adding_app"></div>'
   html
 
 do ->
