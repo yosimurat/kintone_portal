@@ -1,30 +1,55 @@
 $ ->
   
   kintone.events.on('app.record.detail.show', (event) ->
-    console.log('detail.show')
+    console.log('detail.show2')
+    kintone.api(kintone.api.url('/k/v1/app/views', true), 'GET', {app:kintone.app.getId()}, (resp) -> console.log(resp))
 
     kintonePreviewAdd = () ->
       fieldsOption = 
-      app:kintone.app.getId()
-      properties:
-        "archive_do":
-          type: "CHECK_BOX",
-          code: "archive_do",
-          label: "アーカイブ",
-          noLabel: false,
-          required: false,
-          options: 
-              "する": 
-                  label: "する",
-                  index: "0"
-          defaultValue: [],
-          align: "HORIZONTAL"
+        app:kintone.app.getId()
+        properties:
+          "archive_do":
+            type: "CHECK_BOX",
+            code: "archive_do",
+            label: "アーカイブ",
+            noLabel: false,
+            required: false,
+            options: 
+                "する": 
+                    label: "する",
+                    index: "0"
+            defaultValue: [],
+            align: "HORIZONTAL"
       console.log('PREVIEW')
-      kintone.api(kintone.api.url('/k/v1/preview/app/form/fields', true), 'POST', fieldsOption, ((resp) -> kintoneDeploy()), ((resp) -> kintoneRevert()))
+      kintone.api(kintone.api.url('/k/v1/preview/app/form/fields', true), 'POST', fieldsOption, ((resp) -> kintoneViewAdd()), ((resp) -> kintoneRevert()))
+#      kintone.api(kintone.api.url('/k/v1/preview/app/form/fields', true), 'POST', fieldsOption, ((resp) -> kintoneDeploy()), ((resp) -> kintoneRevert()))
 
     kintonePreviewDelete = () ->
       console.log('PREVIEW')
       kintone.api(kintone.api.url('/k/v1/preview/app/form/fields', true), 'DELETE', {app:kintone.app.getId(), fields:['archive_do']}, ((resp) -> kintoneDeploy()), ((resp) -> kintoneRevert()))
+    
+    kintoneViewAdd = () -> 
+      console.log('VIEW PREVIEW')
+      fields = []
+      for key, value of window.settings.archives
+        fields.push(key)
+      fields.push('archive_do')
+      viewName = window.settings.archive_view
+      
+      fieldsOption = 
+        app:kintone.app.getId()
+        views: {}
+      fieldsOption['views'][viewName] =
+            fields: fields
+            #fields:["ドロップダウン", "日付", "文字列__複数行_", 'archive_do']
+            filterCond: ""
+#            id: "5118381"
+            index: "0"
+            name: viewName
+            sort: "レコード番号 desc"
+            type: "LIST"
+
+      kintone.api(kintone.api.url('/k/v1/preview/app/views', true), 'PUT', fieldsOption, ((resp) -> kintoneDeploy()), ((resp) -> console.log(resp)))
     
     kintoneDeploy = () -> 
       console.log('DEPLOY')
@@ -52,9 +77,9 @@ $ ->
         kintonePreviewAdd()
         
     else
-      #kintone.api(kintone.api.url('/k/v1/app/form/fields', true), 'GET', {app: kintone.app.getId()}, (resp) -> console.log(resp))
-      #if confirm('アーカイブの項目を削除しますか？')
-      #  kintonePreviewDelete()
+      # kintone.api(kintone.api.url('/k/v1/app/form/fields', true), 'GET', {app: kintone.app.getId()}, (resp) -> console.log(resp))
+      # if confirm('アーカイブの項目を削除しますか？')
+      #   kintonePreviewDelete()
   )
 
   kintone.events.on('app.record.index.show', (event) ->
